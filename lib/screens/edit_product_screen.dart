@@ -104,6 +104,18 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       id: null,
                       imageUrl: _editedProduct.imageUrl);
                 },
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please provide a price';
+                  }
+                  if (double.tryParse(value) == null) {
+                    return 'Please enter a valid number';
+                  }
+                  if (double.parse(value) <= 0) {
+                    return 'Please enter a price greater than zero';
+                  }
+                  return null;
+                },
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Description'),
@@ -117,6 +129,15 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       description: value,
                       id: null,
                       imageUrl: _editedProduct.imageUrl);
+                },
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please provide a description';
+                  }
+                  if (value.length < 10) {
+                    return 'Description must be longer than 10 caracters';
+                  }
+                  return null;
                 },
               ),
               Row(
@@ -153,6 +174,19 @@ class _EditProductScreenState extends State<EditProductScreen> {
                             description: _editedProduct.description,
                             id: null,
                             imageUrl: value);
+                      },
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please provide an image URL';
+                        }
+                        if (!value.startsWith('http') &&
+                            !value.startsWith('https')) {
+                          return 'Please enter a valid url';
+                        }
+                        if (!value.endsWith('.png') && !value.endsWith('jpg')) {
+                          return 'Image format not supported';
+                        }
+                        return null;
                       },
                     ),
                   ),
