@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import './product.dart';
 import 'dart:convert';
 
+const url = 'https://fluttershop-max.firebaseio.com/products.json';
+
 class Products with ChangeNotifier {
   List<Product> _items = [
     Product(
@@ -47,8 +49,28 @@ class Products with ChangeNotifier {
     return _items.where((item) => item.isFavorite == true).toList();
   }
 
+  Future<void> fetchProducts() async {
+    try {
+      final response = await http.get(url);
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      final List<Product> loadedProducts = [];
+      data.forEach((productId, productData) => {
+            loadedProducts.add(Product(
+                id: productId,
+                title: productData['title'],
+                description: productData['description'],
+                price: productData['price'],
+                imageUrl: productData['imageUrl'],
+                isFavorite: productData['isFavorite']))
+          });
+      _items = loadedProducts;
+      notifyListeners();
+    } catch (error) {
+      throw error;
+    }
+  }
+
   Future<void> addProduct(Product product) async {
-    const url = 'https://fluttershop-max.firebaseio.com/products.json';
     try {
       final res = await http.post(url,
           body: json.encode({
