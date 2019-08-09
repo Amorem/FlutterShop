@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../providers/products.dart';
+import 'package:provider/provider.dart';
 
 import '../providers/product.dart';
 
@@ -14,13 +16,46 @@ class _EditProductScreenState extends State<EditProductScreen> {
   final _imageUrlControler = TextEditingController();
   final _imageUrlFocusNode = FocusNode();
   final _form = GlobalKey<FormState>();
-  var _editedProduct =
-      Product(id: null, title: "", price: 0, description: '', imageUrl: "");
+  var _editedProduct = Product(
+    id: null,
+    title: "",
+    price: 0,
+    description: '',
+    imageUrl: "",
+  );
+  var isInit = true;
+  var _initValues = {
+    'title': '',
+    'price': '',
+    'description': 'CACA PROUT',
+    'imageUrl': '',
+  };
 
   @override
   void initState() {
     _imageUrlFocusNode.addListener(_updateImageUrl);
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (isInit == true) {
+      final productId = ModalRoute.of(context).settings.arguments as String;
+      if (productId != null) {
+        _editedProduct =
+            Provider.of<Products>(context, listen: false).findById(productId);
+        _initValues = {
+          'title': _editedProduct.title,
+          'price': _editedProduct.price.toString(),
+          'description': _editedProduct.description,
+          'imageUrl': ''
+        };
+        _imageUrlControler.text = _editedProduct.imageUrl;
+      }
+    }
+    isInit = false;
+
+    super.didChangeDependencies();
   }
 
   void _updateImageUrl() {
@@ -35,6 +70,14 @@ class _EditProductScreenState extends State<EditProductScreen> {
       return;
     }
     _form.currentState.save();
+    if (_editedProduct.id != null) {
+      Provider.of<Products>(context, listen: false)
+          .updateProduct(_editedProduct);
+    } else {
+      Provider.of<Products>(context, listen: false).addProduct(_editedProduct);
+    }
+
+    Navigator.of(context).pop();
   }
 
   @override
@@ -73,12 +116,14 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_priceFocusNode);
                 },
+                initialValue: _initValues['title'],
                 onSaved: (value) {
                   _editedProduct = Product(
                       title: value,
                       price: _editedProduct.price,
                       description: _editedProduct.description,
-                      id: null,
+                      id: _editedProduct.id,
+                      isFavorite: _editedProduct.isFavorite,
                       imageUrl: _editedProduct.imageUrl);
                 },
                 validator: (value) {
@@ -96,12 +141,14 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_descriptionFocusNode);
                 },
+                initialValue: _initValues['price'],
                 onSaved: (value) {
                   _editedProduct = Product(
                       title: _editedProduct.title,
                       price: double.parse(value),
                       description: _editedProduct.description,
-                      id: null,
+                      id: _editedProduct.id,
+                      isFavorite: _editedProduct.isFavorite,
                       imageUrl: _editedProduct.imageUrl);
                 },
                 validator: (value) {
@@ -127,9 +174,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       title: _editedProduct.title,
                       price: _editedProduct.price,
                       description: value,
-                      id: null,
+                      id: _editedProduct.id,
+                      isFavorite: _editedProduct.isFavorite,
                       imageUrl: _editedProduct.imageUrl);
                 },
+                initialValue: _initValues['description'],
                 validator: (value) {
                   if (value.isEmpty) {
                     return 'Please provide a description';
@@ -172,7 +221,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
                             title: _editedProduct.title,
                             price: _editedProduct.price,
                             description: _editedProduct.description,
-                            id: null,
+                            id: _editedProduct.id,
+                            isFavorite: _editedProduct.isFavorite,
                             imageUrl: value);
                       },
                       validator: (value) {
