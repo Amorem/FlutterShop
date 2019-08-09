@@ -47,10 +47,10 @@ class Products with ChangeNotifier {
     return _items.where((item) => item.isFavorite == true).toList();
   }
 
-  void addProduct(Product product) {
+  Future<void> addProduct(Product product) {
     const url = 'https://fluttershop-max.firebaseio.com/products.json';
 
-    http
+    return http
         .post(url,
             body: json.encode({
               'title': product.title,
