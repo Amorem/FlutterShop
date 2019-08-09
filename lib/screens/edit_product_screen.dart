@@ -27,7 +27,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   var _initValues = {
     'title': '',
     'price': '',
-    'description': 'CACA PROUT',
+    'description': '',
     'imageUrl': '',
   };
 
