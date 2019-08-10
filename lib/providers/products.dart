@@ -120,7 +120,7 @@ class Products with ChangeNotifier {
     _items.removeAt(existingProductIndex);
     notifyListeners();
 
-    final response = await http.delete('$endpoint/products/$productId');
+    final response = await http.delete('$endpoint/products/$productId.json');
     if (response.statusCode >= 400) {
       _items.insert(existingProductIndex, existingProduct);
       notifyListeners();
