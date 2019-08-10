@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/http_exception.dart';
 import 'package:http/http.dart' as http;
 import './product.dart';
 import 'dart:convert';
@@ -117,17 +118,15 @@ class Products with ChangeNotifier {
         _items.indexWhere((prod) => prod.id == productId);
     var existingProduct = _items[existingProductIndex];
     _items.removeAt(existingProductIndex);
+    notifyListeners();
 
-    try {
-      final response = await http.delete('$endpoint/products/$productId.json');
-      if (response.statusCode >= 200) {
-        print(response.statusCode);
-        _items.insert(existingProductIndex, existingProduct);
-        notifyListeners();
-      }
+    final response = await http.delete('$endpoint/products/$productId');
+    if (response.statusCode >= 400) {
+      _items.insert(existingProductIndex, existingProduct);
       notifyListeners();
-    } catch (err) {}
-
+      throw HttpException('(${response.statusCode}) ${response.reasonPhrase}');
+    }
+    existingProduct = null;
     notifyListeners();
   }
 
