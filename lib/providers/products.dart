@@ -42,6 +42,10 @@ class Products with ChangeNotifier {
     ),
   ];
 
+  final String authToken;
+
+  Products(this.authToken, this._items);
+
   List<Product> get items {
     return [..._items];
   }
@@ -52,7 +56,8 @@ class Products with ChangeNotifier {
 
   Future<void> fetchProducts() async {
     try {
-      final response = await http.get('$endpoint/products.json');
+      final response =
+          await http.get('$endpoint/products.json?auth=$authToken');
       final data = json.decode(response.body) as Map<String, dynamic>;
       print(data);
       if (data == null) {

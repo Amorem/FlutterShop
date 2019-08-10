@@ -17,7 +17,6 @@ class Auth with ChangeNotifier {
   }
 
   String get token {
-    print('expirydate: $_expiryDate');
     if (_expiryDate != null &&
         _expiryDate.isAfter(DateTime.now()) &&
         _token != null) {
