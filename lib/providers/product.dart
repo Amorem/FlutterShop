@@ -1,4 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+
+import '../models/http_exception.dart';
+
+const endpoint = 'https://fluttershop-max.firebaseio.com';
 
 class Product with ChangeNotifier {
   final String id;
@@ -16,8 +23,16 @@ class Product with ChangeNotifier {
       @required this.imageUrl,
       this.isFavorite = false});
 
-  void toggleFavoriteStatus() {
+  Future<void> toggleFavoriteStatus() async {
+    final previousStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
+    final response = await http.patch('$endpoint/product/$id.json',
+        body: json.encode({'isFavorite': isFavorite}));
+    if (response.statusCode >= 400) {
+      isFavorite = previousStatus;
+      notifyListeners();
+      throw HttpException('(${response.statusCode}) ${response.reasonPhrase}');
+    }
   }
 }
