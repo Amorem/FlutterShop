@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import './product.dart';
 import 'dart:convert';
 
-const url = 'https://fluttershop-max.firebaseio.com/products.json';
+const endpoint = 'https://fluttershop-max.firebaseio.com';
 
 class Products with ChangeNotifier {
   List<Product> _items = [
@@ -51,7 +51,7 @@ class Products with ChangeNotifier {
 
   Future<void> fetchProducts() async {
     try {
-      final response = await http.get(url);
+      final response = await http.get('$endpoint/products.json');
       final data = json.decode(response.body) as Map<String, dynamic>;
       final List<Product> loadedProducts = [];
       data.forEach((productId, productData) => {
@@ -72,7 +72,7 @@ class Products with ChangeNotifier {
 
   Future<void> addProduct(Product product) async {
     try {
-      final res = await http.post(url,
+      final res = await http.post('$endpoint/products.json',
           body: json.encode({
             'title': product.title,
             'description': product.description,
@@ -94,18 +94,40 @@ class Products with ChangeNotifier {
     }
   }
 
-  void updateProduct(Product product) {
+  Future<void> updateProduct(Product product) async {
     final prodIndex = _items.indexWhere((prod) => prod.id == product.id);
     if (prodIndex >= 0) {
+      await http.patch('$endpoint/products/${product.id}.json',
+          body: json.encode({
+            'title': product.title,
+            'description': product.description,
+            'imageUrl': product.imageUrl,
+            'price': product.price,
+          }));
       _items[prodIndex] = product;
       notifyListeners();
     } else {
-      print('Error, product not found');
+      print('Error, failed to update product');
     }
   }
 
-  void deleteProduct(String productId) {
-    _items.removeWhere((product) => product.id == productId);
+  Future<void> deleteProduct(String productId) async {
+    // Optimistic Updating
+    final existingProductIndex =
+        _items.indexWhere((prod) => prod.id == productId);
+    var existingProduct = _items[existingProductIndex];
+    _items.removeAt(existingProductIndex);
+
+    try {
+      final response = await http.delete('$endpoint/products/$productId.json');
+      if (response.statusCode >= 200) {
+        print(response.statusCode);
+        _items.insert(existingProductIndex, existingProduct);
+        notifyListeners();
+      }
+      notifyListeners();
+    } catch (err) {}
+
     notifyListeners();
   }
 
