@@ -54,6 +54,7 @@ class Products with ChangeNotifier {
     try {
       final response = await http.get('$endpoint/products.json');
       final data = json.decode(response.body) as Map<String, dynamic>;
+      print(data);
       if (data == null) {
         return;
       }
@@ -69,9 +70,7 @@ class Products with ChangeNotifier {
           });
       _items = loadedProducts;
       notifyListeners();
-    } catch (error) {
-      throw error;
-    }
+    } catch (error) {}
   }
 
   Future<void> addProduct(Product product) async {
