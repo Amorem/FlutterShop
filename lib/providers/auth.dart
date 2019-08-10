@@ -12,6 +12,20 @@ class Auth with ChangeNotifier {
   DateTime _expiryDate;
   String _userId;
 
+  bool get isAuth {
+    return token != null;
+  }
+
+  String get token {
+    print('expirydate: $_expiryDate');
+    if (_expiryDate != null &&
+        _expiryDate.isAfter(DateTime.now()) &&
+        _token != null) {
+      return _token;
+    }
+    return null;
+  }
+
   Future<void> signup(String email, String password) async {
     return _authenticate(email, password, AuthMode.Signup);
   }
@@ -43,6 +57,12 @@ class Auth with ChangeNotifier {
       if (data['error'] != null) {
         throw HttpException(data['error']['message']);
       }
+      _token = data['idToken'];
+      _userId = data['localId'];
+      _expiryDate = DateTime.now().add(
+        Duration(seconds: int.parse(data['expiresIn'])),
+      );
+      notifyListeners();
     } catch (error) {
       throw error;
     }
