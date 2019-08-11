@@ -70,4 +70,11 @@ class Auth with ChangeNotifier {
       throw error;
     }
   }
+
+  Future<void> logout() {
+    _token = null;
+    _userId = null;
+    _expiryDate = null;
+    notifyListeners();
+  }
 }
