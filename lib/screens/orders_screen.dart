@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../providers/auth.dart';
 import '../providers/orders.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/order_item.dart' as widg;
@@ -10,7 +11,7 @@ class OrdersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final ordersData = Provider.of<Orders>(context);
+    final authData = Provider.of<Auth>(context);
     return Scaffold(
         appBar: AppBar(
           title: Text('Your orders'),

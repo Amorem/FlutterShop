@@ -23,12 +23,14 @@ class Product with ChangeNotifier {
       @required this.imageUrl,
       this.isFavorite = false});
 
-  Future<void> toggleFavoriteStatus() async {
+  Future<void> toggleFavoriteStatus(String authToken) async {
     final previousStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
-    final response = await http.patch('$endpoint/product/$id.json',
+    final response = await http.patch(
+        '$endpoint/products/$id.json?auth=$authToken',
         body: json.encode({'isFavorite': isFavorite}));
+    print(response.reasonPhrase);
     if (response.statusCode >= 400) {
       isFavorite = previousStatus;
       notifyListeners();
