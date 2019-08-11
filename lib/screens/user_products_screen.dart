@@ -11,7 +11,7 @@ class UserProductsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final productsData = Provider.of<Products>(context);
+    // final productsData = Provider.of<Products>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Manage Products'),
@@ -24,24 +24,37 @@ class UserProductsScreen extends StatelessWidget {
           )
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () => Provider.of<Products>(context).fetchProducts(),
-        child: Padding(
-          padding: EdgeInsets.all(8),
-          child: ListView.builder(
-            itemCount: productsData.items.length,
-            itemBuilder: (ctx, index) => Column(
-              children: <Widget>[
-                UserProductItem(
-                  productsData.items[index].id,
-                  productsData.items[index].title,
-                  productsData.items[index].imageUrl,
-                ),
-                Divider(),
-              ],
-            ),
-          ),
-        ),
+      body: FutureBuilder(
+        future:
+            Provider.of<Products>(context, listen: false).fetchProducts(true),
+        builder: (ctx, snapshot) =>
+            snapshot.connectionState == ConnectionState.waiting
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : RefreshIndicator(
+                    onRefresh: () =>
+                        Provider.of<Products>(context, listen: false)
+                            .fetchProducts(true),
+                    child: Consumer<Products>(
+                      builder: (ctx, productsData, child) => Padding(
+                        padding: EdgeInsets.all(8),
+                        child: ListView.builder(
+                          itemCount: productsData.items.length,
+                          itemBuilder: (ctx, index) => Column(
+                            children: <Widget>[
+                              UserProductItem(
+                                productsData.items[index].id,
+                                productsData.items[index].title,
+                                productsData.items[index].imageUrl,
+                              ),
+                              Divider(),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
       ),
       drawer: AppDrawer(),
     );

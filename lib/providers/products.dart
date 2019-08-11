@@ -22,10 +22,12 @@ class Products with ChangeNotifier {
     return _items.where((item) => item.isFavorite == true).toList();
   }
 
-  Future<void> fetchProducts() async {
+  Future<void> fetchProducts([bool filterByUser = false]) async {
+    final filterString =
+        filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
     try {
-      final response =
-          await http.get('$endpoint/products.json?auth=$authToken');
+      final response = await http
+          .get('$endpoint/products.json?auth=$authToken&$filterString');
       final data = json.decode(response.body) as Map<String, dynamic>;
       print(data);
       if (data == null) {
@@ -59,6 +61,7 @@ class Products with ChangeNotifier {
             'description': product.description,
             'imageUrl': product.imageUrl,
             'price': product.price,
+            'creatorId': userId,
           }));
       final newProduct = Product(
         title: product.title,
